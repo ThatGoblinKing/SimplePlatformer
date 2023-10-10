@@ -7,7 +7,6 @@ class Platform:
         self.sizeX = bottomRight[0] - topLeft[0]
         self.sizeY = bottomRight[1] - topLeft[1]
         self.color = color
-        print("AHH OH GOD WHY DO I EXIS?!?!?!?! PLEASE HELP ME OH FOR THE LOVE OF GOD, LIFE IS MISERABLE! AHHHHAHAHHAHAH AHHHHHH  HELP MEEEEEEEEEEEEEEEEEEEEEEEEE NOOOOOOOOOOOOOOOOOOO also ur mom.")
         
         
     def collide(self, playerX, playerY, playerSizeX, playerSizeY):
