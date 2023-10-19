@@ -15,20 +15,17 @@ xpos = 500  # xpos of player
 ypos = 200  # ypos of player
 vx = 0  # x velocity of player
 vy = 0  # y velocity of player
-# this list holds whether each key has been pressed
-keys = [False, False, False, False]
+# this list holds whether each key has been presse
 # this variable stops gravity from pulling you down more when on a platform
 isOnGround = False
 isOnBouncePad = False
-friction = 1
 
-player1 = Player.Player(pygame.K_LEFT, pygame.K_RIGHT, pygame.K_UP)
-player2 = Player.Player(pygame.K_a, pygame.K_d, pygame.K_w)
+player1 = Player.Player(pygame.K_LEFT, pygame.K_RIGHT, pygame.K_UP, (0,0,255))
+player2 = Player.Player(pygame.K_a, pygame.K_d, pygame.K_w, (255,0,0))
 
 
 platforms = [Platform.Platform((400, 700), (500, 760), (255, 69, 169)), Platform.Platform(
     (0, 800), (800, 825), (0, 0, 0))]
-boing = Platform.BouncePad((500, 750), (600, 800), (255, 255, 255), 1)
 
 
 while not gameover:  # GAME LOOP############################################################
@@ -39,8 +36,8 @@ while not gameover:  # GAME LOOP################################################
         if event.type == pygame.QUIT:
             gameover = True
 
-    player1.move(gameEvents)
-    player2.move(gameEvents)
+    player1.move(gameEvents, platforms)
+    player2.move(gameEvents, platforms)
 
     # RENDER Section--------------------------------------------------------------------------------
 
@@ -48,7 +45,6 @@ while not gameover:  # GAME LOOP################################################
 
     for platform in platforms:
         platform.draw(screen)
-    boing.draw(screen)
     player1.draw(screen)
     player2.draw(screen)
 
