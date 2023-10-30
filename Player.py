@@ -8,7 +8,7 @@ UP = 2
 DOWN = 3
 JOM = pygame.mixer.Sound("VineBoom.mp3")
 SIZE_X = 40
-SIZE_Y = 92
+SIZE_Y = 80
 GRAVITY_ITERATION = .15
 HOVER_TOLERANCE = 5
 JUMP_CONTROL = 0.2
@@ -18,7 +18,8 @@ FRAME_WIDTH = 92
 FRAME_HEIGHT = 92
 RUN_CYCLE_LENGTH = 875
 FRAME_HOLD_LENGTH = 125
-SPRITE_OFFSET = 25
+SPRITE_OFFSET_X = 25
+SPRITE_OFFSET_Y = 12
 
 class Player:
     def __init__(self, left, right, up, color):
@@ -151,30 +152,62 @@ class Player:
 
     def draw(self, screen):
         #pygame.draw.rect(screen, (255,255,255), self.predictedRect)
-        screen.blit(SPRITE_SHEET, (self.xpos - SPRITE_OFFSET, self.ypos), self.spriteProperties)
-        #pygame.draw.rect(screen, (0,255,0), self.rect, 2) <--- HITBOX
+        #pygame.draw.rect(screen, (0, 255, 0), self.rect, 5)
+        screen.blit(SPRITE_SHEET, (self.xpos - SPRITE_OFFSET_X, self.ypos - SPRITE_OFFSET_Y), self.spriteProperties)
     
     def collide(self, otherRect):
         if not pygame.Rect.colliderect(self.predictedRect, otherRect):
             self.colliding = [False, False, False, False]
             return
         
+        
         self.platformLeft = otherRect.left
         self.platformRight = otherRect.right
+        print(self.isOnGround)
+        print("Collision attempted")
 
         self.colliding[LEFT] = abs(self.predictedRect.left + self.vx - otherRect.right) < COLLISION_TOLERANCE
         self.colliding[RIGHT] = abs(self.predictedRect.right + self.vx - otherRect.left) < COLLISION_TOLERANCE
         self.colliding[UP] = abs(self.predictedRect.top + self.vy - otherRect.bottom) < COLLISION_TOLERANCE
         self.colliding[DOWN] = abs(self.predictedRect.bottom + self.vy - otherRect.top) < COLLISION_TOLERANCE
-        if self.colliding[DOWN] or self.colliding == [False, False, False, False]:
-            self.ground = otherRect.top
-        else:
-            self.ground = 800
-        if self.colliding[LEFT]:
+        if self.colliding == [True, False, False, False]:
             self.xpos = otherRect.right
-        if self.colliding[RIGHT]:
+            # print("Left")
+        elif self.colliding == [False, True, False, False]:
             self.xpos = otherRect.left - SIZE_X
-        if self.colliding[UP]:
+            # print("Right")
+        elif self.colliding == [False, False, True, False]:
             self.ypos = otherRect.bottom 
-            print ("hit bottom")
-        print(self.colliding)
+            # print("Top")
+        elif self.colliding == [False, False, False, True]:
+            self.ground = otherRect.top
+            print(self.ground)
+            # print("Bottom")
+            return
+        else:
+            # print("Had to go to secondary check")
+            centerDistanceY = self.predictedRect.height / 2 - otherRect.height / 2
+            centerDistanceX = self.predictedRect.width / 2 - otherRect.width / 2
+            
+            if abs(centerDistanceY) > COLLISION_TOLERANCE and centerDistanceY > centerDistanceX:
+                if centerDistanceY < 0:
+                    self.colliding[DOWN] = True
+                    self.ground = otherRect.top
+                    self.ypos = otherRect.top + SIZE_Y
+                    self.isOnGround = True
+                    print("down")
+                else:
+                    self.colliding[UP] = True
+                    self.ypos = otherRect.bottom
+                    print("up")
+                    print(self.colliding)
+                return
+            elif abs(centerDistanceX) > COLLISION_TOLERANCE:
+                if centerDistanceX > 0:
+                    self.colliding[RIGHT] = True
+                    self.xpos = otherRect.right
+                    print("Right")
+                else:
+                    self.colliding[LEFT] = True
+                    self.xpos = otherRect.left + SIZE_X
+                    print("left")
