@@ -20,6 +20,7 @@ RUN_CYCLE_LENGTH = 875
 FRAME_HOLD_LENGTH = 125
 SPRITE_OFFSET_X = 25
 SPRITE_OFFSET_Y = 12
+INVINCIBILITY_TIME = 500
 
 class Player:
     def __init__(self, left, right, up, color):
@@ -49,6 +50,8 @@ class Player:
         self.ground = 800
         self.platformLeft = 0
         self.platformRight = 0
+        self.health = 3
+        self.nextDamageFrame = 0
         
     def animate(self):
         if self.vx < 0:
@@ -61,7 +64,7 @@ class Player:
         self.spriteProperties = (FRAME_WIDTH * frameNum, self.rowNum * FRAME_HEIGHT, FRAME_WIDTH, FRAME_HEIGHT)
             
 
-    def move(self, gameEvents, platforms):
+    def move(self, gameEvents, platforms, enemies):
 
         for event in gameEvents:  # quit game if x is pressed in top corner
             if event.type == pygame.KEYDOWN:  # keyboard input
@@ -127,6 +130,10 @@ class Player:
             
         for platform in platforms:
             self.collide(platform.getRect())
+            
+        for enemy in enemies:
+            self.collideEnemy(enemy.getRect())
+            
 
         
         if self.colliding[UP] and self.vy < 0 or self.colliding[DOWN] and self.vy > 0:
@@ -205,9 +212,21 @@ class Player:
             elif abs(centerDistanceX) > COLLISION_TOLERANCE:
                 if centerDistanceX > 0:
                     self.colliding[RIGHT] = True
-                    self.xpos = otherRect.right
+                    self.xpos = otherRect.left
                     print("Right")
                 else:
                     self.colliding[LEFT] = True
-                    self.xpos = otherRect.left + SIZE_X
+                    self.xpos = otherRect.right
                     print("left")
+                    
+    def collideEnemy(self, enemyRect):
+        if not pygame.Rect.colliderect(self.predictedRect, enemyRect):
+            return
+        time = pygame.time.get_ticks()
+        if time > self.nextDamageFrame:
+            self.health -= 1
+            self.nextDamageFrame = time + INVINCIBILITY_TIME
+        
+
+    def getHealth(self):
+        return self.health
